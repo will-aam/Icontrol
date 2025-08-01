@@ -1,47 +1,34 @@
-"use client";
+"use client"
 
-import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Plus, Search, Filter, Edit, Trash2, Wrench } from "lucide-react";
-import { OrderModal } from "@/components/order-modal";
-import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { mockOrders } from "@/lib/mock-data";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
-import type { Order } from "@/lib/types";
+import { useState, useMemo } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Plus, Search, Filter, Edit, Trash2, Wrench } from "lucide-react"
+import { OrderModal } from "@/components/order-modal"
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
+import { mockOrders } from "@/lib/mock-data"
+import { formatCurrency, formatDate } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+import type { Order } from "@/lib/types"
 
 export default function HomePage() {
-  const { toast } = useToast();
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
-  const [showOrderModal, setShowOrderModal] = useState(false);
-  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const { toast } = useToast()
+  const [orders, setOrders] = useState<Order[]>(mockOrders)
+  const [showOrderModal, setShowOrderModal] = useState(false)
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null)
 
   // Filter states
-  const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [searchTerm, setSearchTerm] = useState("")
+  const [typeFilter, setTypeFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState<string[]>([])
+  const [dateFrom, setDateFrom] = useState("")
+  const [dateTo, setDateTo] = useState("")
 
   // Filter orders in real-time
   const filteredOrders = useMemo(() => {
@@ -51,100 +38,93 @@ export default function HomePage() {
         !searchTerm ||
         order.nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.contatoCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.descricao.toLowerCase().includes(searchTerm.toLowerCase());
+        order.descricao.toLowerCase().includes(searchTerm.toLowerCase())
 
       // Type filter
-      const typeMatch = typeFilter === "all" || order.tipo === typeFilter;
+      const typeMatch = typeFilter === "all" || order.tipo === typeFilter
 
       // Status filter (multiple selection)
-      const statusMatch =
-        statusFilter.length === 0 || statusFilter.includes(order.status);
+      const statusMatch = statusFilter.length === 0 || statusFilter.includes(order.status)
 
       // Date range filter
-      const orderDate = new Date(order.dataEntrada);
-      const fromDate = dateFrom ? new Date(dateFrom) : null;
-      const toDate = dateTo ? new Date(dateTo) : null;
+      const orderDate = new Date(order.dataEntrada)
+      const fromDate = dateFrom ? new Date(dateFrom) : null
+      const toDate = dateTo ? new Date(dateTo) : null
 
-      const dateMatch =
-        (!fromDate || orderDate >= fromDate) &&
-        (!toDate || orderDate <= toDate);
+      const dateMatch = (!fromDate || orderDate >= fromDate) && (!toDate || orderDate <= toDate)
 
-      return searchMatch && typeMatch && statusMatch && dateMatch;
-    });
-  }, [orders, searchTerm, typeFilter, statusFilter, dateFrom, dateTo]);
+      return searchMatch && typeMatch && statusMatch && dateMatch
+    })
+  }, [orders, searchTerm, typeFilter, statusFilter, dateFrom, dateTo])
 
   const handleCreateOrder = (orderData: Omit<Order, "id" | "dataEntrada">) => {
     const newOrder: Order = {
       ...orderData,
       id: generateOrderId(orderData.tipo),
       dataEntrada: new Date().toISOString().split("T")[0],
-    };
+    }
 
-    setOrders([newOrder, ...orders]);
-    setShowOrderModal(false);
+    setOrders([newOrder, ...orders])
+    setShowOrderModal(false)
     toast({
       title: "Sucesso",
       description: "Ordem criada com sucesso!",
-    });
-  };
+    })
+  }
 
   const handleEditOrder = (order: Order) => {
-    setEditingOrder(order);
-    setShowOrderModal(true);
-  };
+    setEditingOrder(order)
+    setShowOrderModal(true)
+  }
 
   const handleUpdateOrder = (orderData: Omit<Order, "id" | "dataEntrada">) => {
-    if (!editingOrder) return;
+    if (!editingOrder) return
 
     const updatedOrder: Order = {
       ...orderData,
       id: editingOrder.id,
       dataEntrada: editingOrder.dataEntrada,
-    };
+    }
 
-    setOrders(
-      orders.map((order) =>
-        order.id === editingOrder.id ? updatedOrder : order
-      )
-    );
-    setEditingOrder(null);
-    setShowOrderModal(false);
+    setOrders(orders.map((order) => (order.id === editingOrder.id ? updatedOrder : order)))
+    setEditingOrder(null)
+    setShowOrderModal(false)
     toast({
       title: "Sucesso",
       description: "Ordem atualizada com sucesso!",
-    });
-  };
+    })
+  }
 
   const handleDeleteOrder = (order: Order) => {
-    setOrderToDelete(order);
-    setShowDeleteDialog(true);
-  };
+    setOrderToDelete(order)
+    setShowDeleteDialog(true)
+  }
 
   const confirmDelete = () => {
-    if (!orderToDelete) return;
+    if (!orderToDelete) return
 
-    setOrders(orders.filter((order) => order.id !== orderToDelete.id));
-    setOrderToDelete(null);
-    setShowDeleteDialog(false);
+    setOrders(orders.filter((order) => order.id !== orderToDelete.id))
+    setOrderToDelete(null)
+    setShowDeleteDialog(false)
     toast({
       title: "Sucesso",
       description: "Ordem excluída com sucesso!",
-    });
-  };
+    })
+  }
 
   const generateOrderId = (tipo: string): string => {
-    const prefix = tipo === "Serviço" ? "OS" : "VENDA";
-    const count = orders.filter((order) => order.tipo === tipo).length + 1;
-    return `${prefix}-${count.toString().padStart(3, "0")}`;
-  };
+    const prefix = tipo === "Serviço" ? "OS" : "VENDA"
+    const count = orders.filter((order) => order.tipo === tipo).length + 1
+    return `${prefix}-${count.toString().padStart(3, "0")}`
+  }
 
   const clearFilters = () => {
-    setSearchTerm("");
-    setTypeFilter("all");
-    setStatusFilter([]);
-    setDateFrom("");
-    setDateTo("");
-  };
+    setSearchTerm("")
+    setTypeFilter("all")
+    setStatusFilter([])
+    setDateFrom("")
+    setDateTo("")
+  }
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -153,17 +133,13 @@ export default function HomePage() {
       "Aguardando Pagamento": "bg-orange-100 text-orange-800",
       Concluído: "bg-green-100 text-green-800",
       Cancelado: "bg-red-100 text-red-800",
-    };
-    return colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800";
-  };
+    }
+    return colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800"
+  }
 
   const getTypeIcon = (tipo: string) => {
-    return tipo === "Serviço" ? (
-      <Wrench className="h-4 w-4" />
-    ) : (
-      <Plus className="h-4 w-4" />
-    );
-  };
+    return tipo === "Serviço" ? <Wrench className="h-4 w-4" /> : <Plus className="h-4 w-4" />
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -171,12 +147,8 @@ export default function HomePage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              iControl Simplificado
-            </h1>
-            <p className="text-gray-600">
-              Sistema de Gestão de Ordens - iPhone Store
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">iControl Simplificado</h1>
+            <p className="text-gray-600">Sistema de Gestão de Ordens - iPhone Store</p>
           </div>
           <Button onClick={() => setShowOrderModal(true)} size="lg">
             <Plus className="h-4 w-4 mr-2" />
@@ -225,15 +197,13 @@ export default function HomePage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Status</label>
                 <Select
-                  value={
-                    statusFilter.length > 0 ? statusFilter.join(",") : "all"
-                  }
+                  value={statusFilter.length > 0 ? statusFilter.join(",") : "all"}
                   onValueChange={(value) => {
                     if (value === "all") {
-                      setStatusFilter([]);
+                      setStatusFilter([])
                     } else {
-                      const statuses = value.split(",");
-                      setStatusFilter(statuses);
+                      const statuses = value.split(",")
+                      setStatusFilter(statuses)
                     }
                   }}
                 >
@@ -244,9 +214,7 @@ export default function HomePage() {
                     <SelectItem value="all">Todos os Status</SelectItem>
                     <SelectItem value="Pendente">Pendente</SelectItem>
                     <SelectItem value="Em Andamento">Em Andamento</SelectItem>
-                    <SelectItem value="Aguardando Pagamento">
-                      Aguardando Pagamento
-                    </SelectItem>
+                    <SelectItem value="Aguardando Pagamento">Aguardando Pagamento</SelectItem>
                     <SelectItem value="Concluído">Concluído</SelectItem>
                     <SelectItem value="Cancelado">Cancelado</SelectItem>
                   </SelectContent>
@@ -256,21 +224,13 @@ export default function HomePage() {
               {/* Date From */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Data De</label>
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                />
+                <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
               </div>
 
               {/* Date To */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Data Até</label>
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                />
+                <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
               </div>
             </div>
 
@@ -280,11 +240,9 @@ export default function HomePage() {
                 <span>
                   Mostrando {filteredOrders.length} de {orders.length} ordens
                 </span>
-                {(searchTerm ||
-                  typeFilter !== "all" ||
-                  statusFilter.length > 0 ||
-                  dateFrom ||
-                  dateTo) && <Badge variant="secondary">Filtros ativos</Badge>}
+                {(searchTerm || typeFilter !== "all" || statusFilter.length > 0 || dateFrom || dateTo) && (
+                  <Badge variant="secondary">Filtros ativos</Badge>
+                )}
               </div>
               <Button variant="outline" onClick={clearFilters} size="sm">
                 Limpar Filtros
@@ -318,9 +276,7 @@ export default function HomePage() {
                   {filteredOrders.length > 0 ? (
                     filteredOrders.map((order) => (
                       <TableRow key={order.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium">
-                          {order.id}
-                        </TableCell>
+                        <TableCell className="font-medium">{order.id}</TableCell>
                         <TableCell>{order.nomeCliente}</TableCell>
                         <TableCell>{order.contatoCliente}</TableCell>
                         <TableCell>
@@ -334,22 +290,14 @@ export default function HomePage() {
                             {order.descricao}
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">
-                          {formatCurrency(order.valor)}
-                        </TableCell>
+                        <TableCell className="font-medium">{formatCurrency(order.valor)}</TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status}
-                          </Badge>
+                          <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
                         </TableCell>
                         <TableCell>{formatDate(order.dataEntrada)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditOrder(order)}
-                            >
+                            <Button variant="outline" size="sm" onClick={() => handleEditOrder(order)}>
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button
@@ -370,18 +318,14 @@ export default function HomePage() {
                         <div className="text-gray-500">
                           {orders.length === 0 ? (
                             <div>
-                              <p className="mb-2">
-                                Nenhuma ordem cadastrada ainda.
-                              </p>
+                              <p className="mb-2">Nenhuma ordem cadastrada ainda.</p>
                               <Button onClick={() => setShowOrderModal(true)}>
                                 <Plus className="h-4 w-4 mr-2" />
                                 Criar Primeira Ordem
                               </Button>
                             </div>
                           ) : (
-                            <p>
-                              Nenhuma ordem encontrada com os filtros aplicados.
-                            </p>
+                            <p>Nenhuma ordem encontrada com os filtros aplicados.</p>
                           )}
                         </div>
                       </TableCell>
@@ -398,9 +342,9 @@ export default function HomePage() {
       <OrderModal
         open={showOrderModal}
         onOpenChange={(open) => {
-          setShowOrderModal(open);
+          setShowOrderModal(open)
           if (!open) {
-            setEditingOrder(null);
+            setEditingOrder(null)
           }
         }}
         onSubmit={editingOrder ? handleUpdateOrder : handleCreateOrder}
@@ -415,5 +359,5 @@ export default function HomePage() {
         orderToDelete={orderToDelete}
       />
     </div>
-  );
+  )
 }
