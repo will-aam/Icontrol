@@ -1,5 +1,46 @@
 import type { Order } from "./types"
 
+// Add Customer interface and mock data
+export interface Customer {
+  id: string
+  name: string
+  phone: string
+  email: string
+}
+
+export const mockCustomers: Customer[] = [
+  {
+    id: "CUST-001",
+    name: "João Silva",
+    phone: "(11) 99999-1234",
+    email: "joao.silva@email.com",
+  },
+  {
+    id: "CUST-002",
+    name: "Maria Santos",
+    phone: "(11) 98888-5678",
+    email: "maria.santos@email.com",
+  },
+  {
+    id: "CUST-003",
+    name: "Pedro Oliveira",
+    phone: "(11) 97777-9012",
+    email: "pedro.oliveira@email.com",
+  },
+  {
+    id: "CUST-004",
+    name: "Ana Costa",
+    phone: "(11) 96666-3456",
+    email: "ana.costa@email.com",
+  },
+  {
+    id: "CUST-005",
+    name: "Carlos Ferreira",
+    phone: "(11) 95555-7890",
+    email: "carlos.ferreira@email.com",
+  },
+]
+
 export const mockOrders: Order[] = [
   {
     id: "OS-001",
